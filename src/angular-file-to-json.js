@@ -11,9 +11,10 @@ ngFileToJson.directive('ngFileToJson', function(){
         replace: true,
         template: '',
         scope: {
-            type: "csv",
+            fileType: "",
+            headerField: "true",
+            typeField: "false",
             delimiter: ",",
-            header: "true",
             rowDelimiter: "\n"
         },
         compile: function(){
@@ -30,17 +31,33 @@ ngFileToJson.directive('ngFileToJson', function(){
             row,
             columns,
             header,
+            types,
+            validTypes = ['String', 'Number', 'Object', 'Boolean', 'Array'],
             items,
             i;
 
+        opts.headerField = opts.headerField && !opts.headerField === 'false' ? true : false;
+        opts.typeField = opts.typeField && !opts.typeField === 'false' ? true : false;
+
         rows = str.split(opts.rowDelimeter);
 
-        opts.header = opts.header && !opts.header === 'false' ? true : false;
-
-        if(opts.header){
+        if(opts.headerField){
             // set keys
             row = rows.shift();
             header = row.split(opts.delimiter);
+        }
+
+        if(opts.typeField){
+            // set type
+            row = rows.shift();
+            types = row.split(opts.delimiter);
+
+            // check for valid types
+            for(i = 0; i < types.length; i++){
+                if(!(validTypes.indexOf(types[i]) > -1)){
+                    types[i] = 'String';
+                }
+            }
         }
 
         while(rows.length > 0){
