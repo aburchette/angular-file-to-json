@@ -29,5 +29,5 @@ Here are the options, shown with the defaults:
     type="csv"
     delimiter=","
     header="true"
-    row-delimiter=";"
+    rowDelimiter="\n"
     ></ng-file-to-json>
