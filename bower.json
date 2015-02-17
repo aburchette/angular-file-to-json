@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "homepage": "https://github.com/aburchette/angular-file-to-json",
   "description": "Convert files to json object",
-  "moduleType": [
-    "node"
-  ],
+  "main": "./angular-file-to-json.js",
+  "dependencies": {
+    "angular": ">= 1.2.28"
+  },
   "keywords": [
     "angular",
     "json",
@@ -13,15 +14,12 @@
     "txt",
     "file"
   ],
-  "authors": [
-    "Alan Burchette <alanburchette1@gmail.com>"
-  ],
-  "license": "MIT",
   "ignore": [
     "**/.*",
     "node_modules",
     "bower_components",
     "test",
-    "tests"
+    "tests",
+    "Gruntfile.js"
   ]
 }
