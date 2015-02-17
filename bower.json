@@ -1,0 +1,27 @@
+{
+  "name": "angular-file-to-json",
+  "version": "1.0.0",
+  "homepage": "https://github.com/aburchette/angular-file-to-json",
+  "description": "Convert files to json object",
+  "moduleType": [
+    "node"
+  ],
+  "keywords": [
+    "angular",
+    "json",
+    "csv",
+    "txt",
+    "file"
+  ],
+  "authors": [
+    "Alan Burchette <alanburchette1@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
