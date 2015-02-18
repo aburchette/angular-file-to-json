@@ -4,8 +4,11 @@ var ngFileToJson = angular.module('ngFileToJson',[]);
 
 ngFileToJson.directive('ngFileToJson', function(){
     var module,
+        splitColumns,
         createObject,
-        cleanLineBreaks;
+        cleanUpString,
+        createType,
+        validTypes = ['string', 'number', 'object', 'boolean', 'array'];
 
     // module to be returned
     module = {
@@ -13,7 +16,11 @@ ngFileToJson.directive('ngFileToJson', function(){
         transclude: true,
         replace: true,
         scope: {
-            result: '='
+            result: '=',
+            headerField: '=',
+            typeField: '=',
+            delimiter: '=',
+            rowDelimiter: '='
         },
         //templateUrl: './templates/angular-file-to-json.html',
         template: '<div><input ng-model="uploadFile" type="file"></div>',
@@ -39,7 +46,7 @@ ngFileToJson.directive('ngFileToJson', function(){
         var options = {
             fileType: '',
             headerField: 'true',
-            typeField: 'false',
+            typeField: 'true',
             delimiter: ','
         };
 
@@ -48,15 +55,15 @@ ngFileToJson.directive('ngFileToJson', function(){
             row,
             columns,
             header,
-            types,
-            validTypes = ['String', 'Number', 'Object', 'Boolean', 'Array'],
+            types = [],
             items,
-            i;
+            i,
+            value;
 
         options.headerField = options.headerField && !(options.headerField === 'false') ? true : false;
-        options.typeField = options.typeField && !options.typeField === 'false' ? true : false;
+        options.typeField = options.typeField && !(options.typeField === 'false') ? true : false;
 
-        rows = cleanLineBreaks(str).split('\n');
+        rows = cleanUpString(str).split('\n');
 
         if(options.headerField){
             // set keys
@@ -71,8 +78,10 @@ ngFileToJson.directive('ngFileToJson', function(){
 
             // check for valid types
             for(i = 0; i < types.length; i++){
-                if(!(validTypes.indexOf(types[i]) > -1)){
-                    types[i] = 'String';
+                if(!(validTypes.indexOf(types[i].toLowerCase()) > -1)){
+                    types[i] = 'string';
+                } else {
+                    types[i] = types[i].toLowerCase();
                 }
             }
         }
@@ -81,11 +90,18 @@ ngFileToJson.directive('ngFileToJson', function(){
             // set values
             items = {};
             row = rows.shift();
-            columns = row.split(options.delimiter);
+            columns = splitColumns(row, options.delimiter);
 
             if(header){
                 for(i = 0; i < columns.length; i++){
-                    items[header[i] || ''] = columns[i];
+                    if(types.length && types[i]){
+                        // if the types array is set
+                        value = createType(types[i], columns[i]);
+                        items[header[i] || ''] = value;
+                    } else {
+                        // set the key/value
+                        items[header[i] || ''] = columns[i];
+                    }
                 }
                 obj.push(items);
             } else {
@@ -94,21 +110,78 @@ ngFileToJson.directive('ngFileToJson', function(){
 
         }
 
+        console.log(obj);
+
         return obj;
     };
 
+    // special function to split row into columns using a delimiter
+    splitColumns = function(row, delimiter){
+        var regex = new RegExp('(".*?"|[^"' + delimiter + ']+)', 'g');
+        return row.match(regex);
+    };
+
     // helper function to clean up line breaks
-    cleanLineBreaks = function(str){
+    // this breaks down the string into characters, removes the carriage return, and builds the string again
+    cleanUpString = function(str){
         var arr = str.split(''),
             i;
 
+        // start from the last item since items will be removed which will mess up the loop
         for(i = arr.length - 1; i >=0; i--){
             if(arr[i] === '\r'){
                 arr.splice(i, 1);
             }
         }
 
-        return arr.join('');
+        str = arr.join('');
+
+        // smart single quotes and apostrophe
+        str = str.replace(/[\u2018\u2019\u201Aâ]/g, "\'");
+        // smart double quotes
+        str = str.replace(/[\u201C\u201D\u201E]/g, "\"");
+        // ellipsis
+        str = str.replace(/\u2026/g, "...");
+        // dashes
+        str = str.replace(/[\u2013\u2014]/g, "-");
+        // circumflex
+        str = str.replace(/\u02C6/g, "^");
+        // open angle bracket
+        str = str.replace(/\u2039/g, "<");
+        // close angle bracket
+        str = str.replace(/\u203A/g, ">");
+        // spaces
+        str = str.replace(/[\u02DC\u00A0]/g, " ");
+
+        return str;
+    };
+
+    createType = function(type, value){
+        var obj;
+
+        switch(type) {
+            case 'string':
+                return (new String(value)).valueOf();
+            case 'number':
+                return parseInt(value);
+            case 'object':
+                if(value) {
+                    try {
+                        obj = JSON.parse(JSON.stringify(eval("(" + value + ")")));
+                    } catch(e){
+                        return {};
+                    }
+                    return obj;
+                } else {
+                    return {};
+                }
+            case 'array':
+                return JSON.parse(value);
+            case 'boolean':
+                return (new Boolean(value.toLowerCase())).valueOf();
+            default:
+                return (new String(value)).valueOf();
+        }
     };
 
     // Expose directive
