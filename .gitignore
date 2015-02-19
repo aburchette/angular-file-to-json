@@ -1,3 +1,5 @@
 node_modules/
 npm-debug.log
 .idea/
+angular-file-to-json.js
+angular-file-to-json.min.js
