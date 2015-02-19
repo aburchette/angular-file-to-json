@@ -1,8 +1,8 @@
-'use strict';
-
 var ngFileToJson = angular.module('ngFileToJson',[]);
 
 ngFileToJson.directive('ngFileToJson', function(){
+    'use strict';
+
     var module,
         splitColumns,
         createObject,
@@ -64,8 +64,8 @@ ngFileToJson.directive('ngFileToJson', function(){
             i,
             value;
 
-        options.headerField = options.headerField && !(options.headerField === 'false') ? true : false;
-        options.typeField = options.typeField && !(options.typeField === 'false') ? true : false;
+        options.headerField = options.headerField && options.headerField === 'true' ? true : false;
+        options.typeField = options.typeField && options.typeField === 'true' ? true : false;
 
 
         rows = cleanUpString(str).split(options.rowDelimiter);
@@ -83,7 +83,7 @@ ngFileToJson.directive('ngFileToJson', function(){
 
             // check for valid types
             for(i = 0; i < types.length; i++){
-                if(!(validTypes.indexOf(types[i].toLowerCase()) > -1)){
+                if(validTypes.indexOf(types[i].toLowerCase()) === -1){
                     types[i] = 'string';
                 } else {
                     types[i] = types[i].toLowerCase();
@@ -201,7 +201,7 @@ ngFileToJson.directive('ngFileToJson', function(){
 
         switch(type) {
             case 'string':
-                return (new String(value)).valueOf();
+                return String(value);
             case 'number':
                 return parseInt(value);
             case 'object':
@@ -216,6 +216,7 @@ ngFileToJson.directive('ngFileToJson', function(){
                 } else {
                     return {};
                 }
+                break;
             case 'array':
                 if(value) {
                     try {
@@ -243,10 +244,11 @@ ngFileToJson.directive('ngFileToJson', function(){
                 } else {
                     return [];
                 }
+                break;
             case 'boolean':
-                return (new Boolean(value.toLowerCase())).valueOf();
+                return Boolean(value.toLowerCase());
             default:
-                return (new String(value)).valueOf();
+                return String(value);
         }
     };
 
