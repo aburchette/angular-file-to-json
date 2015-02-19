@@ -17,15 +17,13 @@ ngFileToJson.directive('ngFileToJson', function(){
         replace: true,
         scope: {
             result: '=',
-            headerField: '=',
-            typeField: '=',
-            delimiter: '=',
-            rowDelimiter: '='
+            headerField: '@headerField',
+            typeField: '@typeField',
+            delimiter: '@delimiter',
+            rowDelimiter: '@rowDelimiter'
         },
-        //templateUrl: './templates/angular-file-to-json.html',
         template: '<div><input ng-model="uploadFile" type="file"></div>',
         link: function(scope, element){
-
             // when the element changes (eg. file selected) the HTML5 FileReader will load the file
             element.on('change', function(event){
                 var uploadedFile = new FileReader();
@@ -34,7 +32,7 @@ ngFileToJson.directive('ngFileToJson', function(){
 
                 uploadedFile.onload = function(e){
                     scope.$apply(function(){
-                        scope.result = createObject(e.target.result);
+                        scope.result = createObject(e.target.result, scope);
                     });
                 };
             });
@@ -42,13 +40,19 @@ ngFileToJson.directive('ngFileToJson', function(){
     };
 
     // The function that actually converts the string into an object
-    createObject = function(str) {
+    createObject = function(str, overrides) {
         var options = {
-            fileType: '',
             headerField: 'true',
-            typeField: 'true',
-            delimiter: ','
+            typeField: 'false',
+            delimiter: ',',
+            rowDelimiter: '\n'
         };
+
+        // override the defaults if set in the attributes
+        options.headerField = overrides.headerField || options.headerField;
+        options.typeField = overrides.typeField || options.typeField;
+        options.delimiter = overrides.delimiter || options.delimiter;
+        options.rowDelimiter = overrides.rowDelimiter || options.rowDelimiter;
 
         var obj = [],
             rows,
@@ -63,7 +67,8 @@ ngFileToJson.directive('ngFileToJson', function(){
         options.headerField = options.headerField && !(options.headerField === 'false') ? true : false;
         options.typeField = options.typeField && !(options.typeField === 'false') ? true : false;
 
-        rows = cleanUpString(str).split('\n');
+
+        rows = cleanUpString(str).split(options.rowDelimiter);
 
         if(options.headerField){
             // set keys
@@ -88,11 +93,12 @@ ngFileToJson.directive('ngFileToJson', function(){
 
         while(rows.length > 0){
             // set values
-            items = {};
             row = rows.shift();
             columns = splitColumns(row, options.delimiter);
 
+            // if header row exists use this for the keys
             if(header){
+                items = {};
                 for(i = 0; i < columns.length; i++){
                     if(types.length && types[i]){
                         // if the types array is set
@@ -104,14 +110,17 @@ ngFileToJson.directive('ngFileToJson', function(){
                     }
                 }
                 obj.push(items);
+
+            // otherwise will be an array
             } else {
-                obj.push(columns);
+                items = [];
+                for(i = 0; i < columns.length; i++){
+                    value = parseString(types[i], columns[i]);
+                    items.push(value);
+                }
+                obj.push(items);
             }
-
         }
-
-        // temporary
-        window.console && console.log(obj);
 
         // return compiled JSON object
         return obj;
@@ -197,6 +206,7 @@ ngFileToJson.directive('ngFileToJson', function(){
                 return parseInt(value);
             case 'object':
                 if(value) {
+                    value = value.replace(/^"|"$/g, '');
                     try {
                         obj = JSON.parse(JSON.stringify(eval("(" + value + ")")));
                     } catch(e){
