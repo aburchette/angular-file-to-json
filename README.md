@@ -27,7 +27,7 @@ At a minimum you should specify the `result` attribute. This is where you will g
 <ng-file-to-json result="obj"></ng-file-to-json>
 
 <div ng-if="obj">
-    <div><pre>{{ obj }}</pre></div>
+    <div><pre>\{\{ obj \}\}</pre></div>
 </div>
 ```
 
