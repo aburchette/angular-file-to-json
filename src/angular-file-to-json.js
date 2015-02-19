@@ -7,7 +7,7 @@ ngFileToJson.directive('ngFileToJson', function(){
         splitColumns,
         createObject,
         cleanUpString,
-        createType,
+        parseString,
         validTypes = ['string', 'number', 'object', 'boolean', 'array'];
 
     // module to be returned
@@ -25,16 +25,16 @@ ngFileToJson.directive('ngFileToJson', function(){
         //templateUrl: './templates/angular-file-to-json.html',
         template: '<div><input ng-model="uploadFile" type="file"></div>',
         link: function(scope, element){
+
+            // when the element changes (eg. file selected) the HTML5 FileReader will load the file
             element.on('change', function(event){
-                var str = '',
-                    uploadedFile = new FileReader();
+                var uploadedFile = new FileReader();
 
                 uploadedFile.readAsBinaryString(event.target.files[0]);
 
                 uploadedFile.onload = function(e){
                     scope.$apply(function(){
-                        str = e.target.result;
-                        scope.result = createObject(str);
+                        scope.result = createObject(e.target.result);
                     });
                 };
             });
@@ -92,13 +92,11 @@ ngFileToJson.directive('ngFileToJson', function(){
             row = rows.shift();
             columns = splitColumns(row, options.delimiter);
 
-            console.log(columns);
-
             if(header){
                 for(i = 0; i < columns.length; i++){
                     if(types.length && types[i]){
                         // if the types array is set
-                        value = createType(types[i], columns[i]);
+                        value = parseString(types[i], columns[i]);
                         items[header[i] || ''] = value;
                     } else {
                         // set the key/value
@@ -112,55 +110,49 @@ ngFileToJson.directive('ngFileToJson', function(){
 
         }
 
-        console.log(obj);
+        // temporary
+        window.console && console.log(obj);
 
+        // return compiled JSON object
         return obj;
     };
 
-    // special function to split row into columns using a delimiter
+    // special function to split row into columns using a delimiter since RegEx does not have a good way to do this
     splitColumns = function(row, delimiter){
         var characters = row.split(''),
             inQuotes = false,
-            indeces = [],
+            indexes = [],
             i,
             lastIndex = 0,
             columns = [];
 
+        // if a delimiter is between two double quotes, then it is part of the string and not counted
         for(i = 0; i < characters.length; i++){
             if(characters[i] === '"'){
                 inQuotes = !inQuotes;
             }
 
             if(!inQuotes && characters[i] === delimiter){
-                indeces.push(i);
+                indexes.push(i);
             }
         }
 
-        if(indeces.length) {
-            for(i = 0; i < indeces.length; i++){
-                columns.push(row.slice(lastIndex, indeces[i]));
-                lastIndex = indeces[i] + 1;
+        // all indexes are now used to split the columns
+        if(indexes.length) {
+            for(i = 0; i < indexes.length; i++){
+                columns.push(row.slice(lastIndex, indexes[i]));
+                lastIndex = indexes[i] + 1;
             }
+            // last column
             columns.push(row.slice(lastIndex, characters.length));
         }
 
-
-        //var quoted = [],
-        //    placeholder = '**' + Math.floor(Math.random() * 1000) + '**',
-        //    index = 0,
-        //    columns;
-        //
-        //quoted.push(str.replace(/(".*?")/g, placeholder + index));
-        //index++;
-        //
-        //columns = str.split(delimiter);
-
-        //var regex = new RegExp('(".*?"|[^"' + delimiter + ']+|$)', 'g');
         return columns;
     };
 
     // helper function to clean up line breaks
     // this breaks down the string into characters, removes the carriage return, and builds the string again
+    // it also replaces invalid characters inserted by spreadsheets and other text editors
     cleanUpString = function(str){
         var arr = str.split(''),
             i;
@@ -194,7 +186,7 @@ ngFileToJson.directive('ngFileToJson', function(){
         return str;
     };
 
-    createType = function(type, value){
+    parseString = function(type, value){
         var obj,
             arr;
 
@@ -222,16 +214,16 @@ ngFileToJson.directive('ngFileToJson', function(){
                         arr = value.split(',');
                         angular.forEach(arr, function(item) {
                             if((item.toLowerCase().indexOf('true') > -1) || (item.toLowerCase().indexOf('false') > -1)){
-                                obj.push(createType('boolean', item));
+                                obj.push(parseString('boolean', item));
                             } else if(item.indexOf('{') > -1){
-                                obj.push(createType('object', item));
+                                obj.push(parseString('object', item));
                             } else if(item.indexOf('[') > -1){
-                                obj.push(createType('array', item));
+                                obj.push(parseString('array', item));
                             } else if(item.indexOf("'") > -1){
                                 item = item.replace(/["']/g, '');
-                                obj.push(createType('string', item));
+                                obj.push(parseString('string', item));
                             } else if(item.match(/\d/)){
-                                obj.push(createType('number', item));
+                                obj.push(parseString('number', item));
                             }
                         });
                     } catch(e){
