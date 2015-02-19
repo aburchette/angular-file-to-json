@@ -203,7 +203,7 @@ ngFileToJson.directive('ngFileToJson', function(){
             case 'string':
                 return String(value);
             case 'number':
-                return parseInt(value);
+                return parseFloat(value);
             case 'object':
                 if(value) {
                     value = value.replace(/^"|"$/g, '');
