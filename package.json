@@ -1,6 +1,6 @@
 {
   "name": "angular-file-to-json",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Upload various files to convert to JSON objects",
   "main": "index.js",
   "scripts": {

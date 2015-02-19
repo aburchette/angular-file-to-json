@@ -14,10 +14,17 @@ Angular File to JSON is a directive used to convert various files to JSON object
 
 **(1)** Download the file at [Repository](https://github.com/aburchette/angular-file-to-json)
 
-**(2)** Perform your own build
+**(2)** Install from Bower
+ - Open Terminal
+ - Install package with `bower install angular-file-to-json`
+ - Add `angular-file-to-json/angular-file-to-json.js` to your list of scripts to load
+ - Add module `angular-file-to-json` as a dependency to your app
+ - Add the directive using an element `<ng-file-to-json></ng-file-to-json>` together with options as attributes
+
+**(3)** Perform your own build
  - Open Terminal
  - Clone the Angular File to JSON repository at [Repository](https://github.com/aburchette/angular-file-to-json)
- - Install npm modules with the command`npm install`
+ - Install npm modules with the command `npm install`
  - Build the script using `grunt`
  - Add `angular-file-to-json/angular-file-to-json.js` to your list of scripts to load
  - Add module `angular-file-to-json` as a dependency to your app

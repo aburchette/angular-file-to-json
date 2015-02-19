@@ -1,7 +1,7 @@
 {
   "name": "angular-file-to-json",
   "description": "Upload various files to convert to JSON objects",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "homepage": "https://github.com/aburchette/angular-file-to-json",
   "main": "./angular-file-to-json.js",
   "license": "MIT",
