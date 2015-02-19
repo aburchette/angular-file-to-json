@@ -92,6 +92,8 @@ ngFileToJson.directive('ngFileToJson', function(){
             row = rows.shift();
             columns = splitColumns(row, options.delimiter);
 
+            console.log(columns);
+
             if(header){
                 for(i = 0; i < columns.length; i++){
                     if(types.length && types[i]){
@@ -117,8 +119,44 @@ ngFileToJson.directive('ngFileToJson', function(){
 
     // special function to split row into columns using a delimiter
     splitColumns = function(row, delimiter){
-        var regex = new RegExp('(".*?"|[^"' + delimiter + ']+)', 'g');
-        return row.match(regex);
+        var characters = row.split(''),
+            inQuotes = false,
+            indeces = [],
+            i,
+            lastIndex = 0,
+            columns = [];
+
+        for(i = 0; i < characters.length; i++){
+            if(characters[i] === '"'){
+                inQuotes = !inQuotes;
+            }
+
+            if(!inQuotes && characters[i] === delimiter){
+                indeces.push(i);
+            }
+        }
+
+        if(indeces.length) {
+            for(i = 0; i < indeces.length; i++){
+                columns.push(row.slice(lastIndex, indeces[i]));
+                lastIndex = indeces[i] + 1;
+            }
+            columns.push(row.slice(lastIndex, characters.length));
+        }
+
+
+        //var quoted = [],
+        //    placeholder = '**' + Math.floor(Math.random() * 1000) + '**',
+        //    index = 0,
+        //    columns;
+        //
+        //quoted.push(str.replace(/(".*?")/g, placeholder + index));
+        //index++;
+        //
+        //columns = str.split(delimiter);
+
+        //var regex = new RegExp('(".*?"|[^"' + delimiter + ']+|$)', 'g');
+        return columns;
     };
 
     // helper function to clean up line breaks
@@ -157,7 +195,8 @@ ngFileToJson.directive('ngFileToJson', function(){
     };
 
     createType = function(type, value){
-        var obj;
+        var obj,
+            arr;
 
         switch(type) {
             case 'string':
@@ -176,7 +215,32 @@ ngFileToJson.directive('ngFileToJson', function(){
                     return {};
                 }
             case 'array':
-                return JSON.parse(value);
+                if(value) {
+                    try {
+                        obj = [];
+                        value = value.replace(/^"?\[|\]"?$/g, '');
+                        arr = value.split(',');
+                        angular.forEach(arr, function(item) {
+                            if((item.toLowerCase().indexOf('true') > -1) || (item.toLowerCase().indexOf('false') > -1)){
+                                obj.push(createType('boolean', item));
+                            } else if(item.indexOf('{') > -1){
+                                obj.push(createType('object', item));
+                            } else if(item.indexOf('[') > -1){
+                                obj.push(createType('array', item));
+                            } else if(item.indexOf("'") > -1){
+                                item = item.replace(/["']/g, '');
+                                obj.push(createType('string', item));
+                            } else if(item.match(/\d/)){
+                                obj.push(createType('number', item));
+                            }
+                        });
+                    } catch(e){
+                        return [];
+                    }
+                    return obj;
+                } else {
+                    return [];
+                }
             case 'boolean':
                 return (new Boolean(value.toLowerCase())).valueOf();
             default:
