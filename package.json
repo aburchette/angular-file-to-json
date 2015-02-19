@@ -1,7 +1,7 @@
 {
   "name": "angular-file-to-json",
-  "version": "1.0.0",
-  "description": "Convert file to JSON object",
+  "version": "0.0.1",
+  "description": "Upload various files to convert to JSON objects",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

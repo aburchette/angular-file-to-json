@@ -1,9 +1,16 @@
 {
   "name": "angular-file-to-json",
-  "version": "1.0.0",
+  "description": "Upload various files to convert to JSON objects",
+  "version": "0.0.1",
   "homepage": "https://github.com/aburchette/angular-file-to-json",
-  "description": "Convert files to json object",
   "main": "./angular-file-to-json.js",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Alan Burchette",
+      "email": "<alanburchette1@gmail.com>"
+    }
+  ],
   "dependencies": {
     "angular": ">= 1.2.28"
   },
@@ -17,9 +24,6 @@
   "ignore": [
     "**/.*",
     "node_modules",
-    "bower_components",
-    "test",
-    "tests",
-    "Gruntfile.js"
+    "bower_components"
   ]
 }
