@@ -22,12 +22,11 @@ Angular File to JSON is a directive used to convert various files to JSON object
 
 At a minimum you should specify the `result` attribute. This is where you will get the JSON result of the file upload.
 
->
 ```html
 <ng-file-to-json result="obj"></ng-file-to-json>
 
 <div ng-if="obj">
-    <div><pre>\{\{ obj \}\}</pre></div>
+    <pre>{{ obj }}</pre>
 </div>
 ```
 
@@ -43,7 +42,6 @@ Here is a list of the options:
 
 ### Sample element with all the default values
 
->
 ```html
 <ng-file-to-json
 	result="obj"
