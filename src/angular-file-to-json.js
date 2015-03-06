@@ -1,4 +1,4 @@
-var ngFileToJson = angular.module('ngFileToJson',[]);
+var ngFileToJson = angular.module('ngFileToJson',['ng']);
 
 ngFileToJson.directive('ngFileToJson', function(){
     'use strict';
